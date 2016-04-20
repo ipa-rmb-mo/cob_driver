@@ -57,8 +57,7 @@
 	#include "tinyxml.h"
 #else
 	#include "cob_driver/cob_camera_sensors/common/include/cob_camera_sensors/Swissranger.h"
-	#include "cob_common/cob_vision_utils/common/include/cob_vision_utils/VisionUtils.h"
-	#include "cob_vision/windows/src/extern/TinyXml/tinyxml.h"
+	#include "cob_perception_common/cob_vision_utils/common/include/cob_vision_utils/VisionUtils.h"
 #endif
 
 using namespace ipa_CameraSensors;
@@ -480,15 +479,15 @@ unsigned long Swissranger::SetProperty(t_cameraProperty* cameraProperty)
 			else if (cameraProperty->propertyType & (ipa_CameraSensors::TYPE_STRING))
 			{
 				// MF_40MHz, SR3k: maximal range 3.75m
-                // MF_30MHz, SR3k, SR4k: maximal range 5m
-                // MF_21MHz, SR3k: maximal range 7.14m
-                // MF_20MHz, SR3k: maximal range 7.5m
-                // MF_19MHz, SR3k: maximal range 7.89m
-                // MF_60MHz, SR4k: maximal range 2.5m
-                // MF_15MHz, SR4k: maximal range 10m
-                // MF_10MHz, SR4k: maximal range 15m
-                // MF_29MHz, SR4k: maximal range 5.17m
-                // MF_31MHz
+				// MF_30MHz, SR3k, SR4k: maximal range 5m
+				// MF_21MHz, SR3k: maximal range 7.14m
+				// MF_20MHz, SR3k: maximal range 7.5m
+				// MF_19MHz, SR3k: maximal range 7.89m
+				// MF_60MHz, SR4k: maximal range 2.5m 
+				// MF_15MHz, SR4k: maximal range 10m
+				// MF_10MHz, SR4k: maximal range 15m
+				// MF_29MHz, SR4k: maximal range 5.17m
+				// MF_31MHz
 				if (cameraProperty->stringData == "MF_40MHz")
 				{
 					err = SR_SetModulationFrequency(m_SRCam, MF_40MHz);
@@ -863,7 +862,7 @@ unsigned long Swissranger::AcquireImages(int widthStepRange, int widthStepGray, 
 
 				// Undistort
 				cv::Mat undistortedData;
-	 			assert (!m_undistortMapX.empty() && !m_undistortMapY.empty());
+				assert (!m_undistortMapX.empty() && !m_undistortMapY.empty());
 				cv::remap(distortedData, undistortedData, m_undistortMapX, m_undistortMapY, cv::INTER_LINEAR);
 
 				/*IplImage dummy;
@@ -916,7 +915,7 @@ unsigned long Swissranger::AcquireImages(int widthStepRange, int widthStepGray, 
 
 			// Undistort
 			cv::Mat undistortedData;
- 			assert (!m_undistortMapX.empty() && !m_undistortMapY.empty());
+			assert (!m_undistortMapX.empty() && !m_undistortMapY.empty());
 			cv::remap(distortedData, undistortedData, m_undistortMapX, m_undistortMapY, cv::INTER_LINEAR);
 
 			// Calculate X and Y based on instrinsic rotation and translation

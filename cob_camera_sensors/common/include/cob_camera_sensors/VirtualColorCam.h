@@ -60,7 +60,6 @@
 #ifndef __IPA_VIRTUALCOLORCAM_H__
 #define __IPA_VIRTUALCOLORCAM_H__
 
-#include "StdAfx.h"
 #ifdef __LINUX__
 	#include "cob_camera_sensors/AbstractColorCamera.h"
 #else
@@ -120,6 +119,8 @@ class __DLL_LIBCAMERASENSORS__ VirtualColorCam : public AbstractColorCamera
 		unsigned long GetProperty(t_cameraProperty* cameraProperty);
 		unsigned long PrintCameraInformation();
 		unsigned long TestCamera(const char* filename);
+
+		unsigned long ResetImages();
 
 		//*******************************************************************************
 		// Camera specific functions

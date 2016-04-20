@@ -59,8 +59,6 @@
 #ifndef __IPA_VIRTUALRANGECAM_H__
 #define __IPA_VIRTUALRANGECAM_H__
 
-#include "StdAfx.h"
-
 #ifdef __LINUX__
 	#include <cob_camera_sensors/AbstractRangeImagingSensor.h>
 #else
@@ -105,10 +103,10 @@ public:
 
 	unsigned long AcquireImages(int widthStepRange, int widthStepGray, int widthStepCartesian, char* rangeImage=NULL, char* intensityImage=NULL,
 		char* cartesianImage=NULL, bool getLatestFrame=true, bool undistort=true,
-		ipa_CameraSensors::t_ToFGrayImageType grayImageType = ipa_CameraSensors::INTENSITY_32F1);
+		ipa_CameraSensors::t_ToFGrayImageType grayImageType = ipa_CameraSensors::INTENSITY);
 	unsigned long AcquireImages(cv::Mat* rangeImage = 0, cv::Mat* intensityImage = 0,
 		cv::Mat* cartesianImage = 0, bool getLatestFrame = true, bool undistort = true,
-		ipa_CameraSensors::t_ToFGrayImageType grayImageType = ipa_CameraSensors::INTENSITY_32F1);
+		ipa_CameraSensors::t_ToFGrayImageType grayImageType = ipa_CameraSensors::INTENSITY);
 
 	unsigned long GetCalibratedUV(double x, double y, double z, double& u, double& v);
 
@@ -116,6 +114,8 @@ public:
 
 	bool isInitialized() {return m_initialized;}
 	bool isOpen() {return m_open;}
+
+	unsigned long ResetImages();
 
 	/// Returns the number of images in the directory
 	/// @return The number of images in the directory
@@ -134,7 +134,7 @@ private:
 
 	/// Reads out the image width and height from the first image found in the filesystem.
 	/// @param filename The name of that image.
-	inline void UpdateImageDimensionsOnFirstImage(std::string filename, std::string ext=".xml");
+	inline void UpdateImageDimensionsOnFirstImage(std::string filename, int& type, std::string ext=".xml");
 
 	/// Compares the value of the iterator with ext in order to find the extension which has instances in the directory.
 	/// Throws an error if different file formats are present at the same time.
@@ -174,8 +174,15 @@ private:
 	std::vector<std::string> m_RangeImageFileNames ;
 	std::vector<std::string> m_CoordinateImageFileNames ;
 
+	int m_IntensityImageType; ///< Opencv type e.g. CV_8UC3
+	int m_AmplitudeImageType; ///< Opencv type e.g. CV_8UC3
+	int m_RangeImageImageType; ///< Opencv type e.g. CV_32FC1
+	int m_CoordinateImageType; ///< Opencv type e.g. CV_32FC3
+
 	int m_ImageWidth;  ///< Image width
 	int m_ImageHeight; ///< Image height
+
+
 
 	double m_k1, m_k2, m_p1, m_p2; ///< Distortion parameters
 };

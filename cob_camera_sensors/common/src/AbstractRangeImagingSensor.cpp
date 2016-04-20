@@ -51,14 +51,14 @@
 *
 ****************************************************************/
 
-#include "../include/cob_camera_sensors/StdAfx.h"
+#include <cob_vision_utils/StdAfx.h>
 
 #ifdef __LINUX__
 #include "cob_camera_sensors/AbstractRangeImagingSensor.h"
 #include "cob_vision_utils/GlobalDefines.h"
 #else
 #include "cob_driver/cob_camera_sensors/common/include/cob_camera_sensors/AbstractRangeImagingSensor.h"
-#include "cob_common/cob_vision_utils/common/include/cob_vision_utils/GlobalDefines.h"
+#include "cob_perception_common/cob_vision_utils/common/include/cob_vision_utils/GlobalDefines.h"
 #endif
 
 using namespace ipa_CameraSensors;
@@ -74,10 +74,46 @@ unsigned long AbstractRangeImagingSensor::SetIntrinsics(cv::Mat& intrinsicMatrix
 	m_undistortMapX = undistortMapX.clone();
 	m_undistortMapY = undistortMapY.clone();
 
-	return RET_OK;
+	// Debug
+	std::cout << "INFO - AbstractRangeImagingSensor::SetIntrinsics" << std::endl;
+	std::cout << "\t... Intrinsic Matrix Camera 0" << std::endl;
+	std::cout << "\t... / " << std::setw(8) << m_intrinsicMatrix.at<double>(0, 0) << " ";
+	std::cout << std::setw(8) << m_intrinsicMatrix.at<double>(0, 1) << " ";
+	std::cout << std::setw(8) << m_intrinsicMatrix.at<double>(0, 2) << " \\ " << std::endl;;
+	std::cout << "\t... | " << std::setw(8) << m_intrinsicMatrix.at<double>(1, 0) << " ";
+	std::cout << std::setw(8) << m_intrinsicMatrix.at<double>(1, 1) << " ";
+	std::cout << std::setw(8) << m_intrinsicMatrix.at<double>(1, 2) << " | " << std::endl;
+	std::cout << "\t... \\ " << std::setw(8) << m_intrinsicMatrix.at<double>(2, 0) << " ";
+	std::cout << std::setw(8) << m_intrinsicMatrix.at<double>(2, 1) << " ";
+	std::cout << std::setw(8) << m_intrinsicMatrix.at<double>(2, 2) << " / " << std::endl << std::endl;
+
+	return RET_OK; 
 }
 
-unsigned long AbstractRangeImagingSensor::SetPathToImages(std::string path)
+unsigned long AbstractRangeImagingSensor::SetExtrinsics(cv::Mat& extrinsicMatrix)
+{
+	m_extrinsicMatrix = extrinsicMatrix.clone();
+
+	// Debug
+	std::cout << "INFO - AbstractRangeImagingSensor::SetExtrinsics" << std::endl;
+	std::cout << "\t... Extrinsic Matrix (R|T)" << std::endl;
+	std::cout << "\t... / " << std::setw(8) <<  extrinsicMatrix.at<double>(0, 0) << " ";
+	std::cout << std::setw(8) << extrinsicMatrix.at<double>(0, 1) << " ";
+	std::cout << std::setw(8) << extrinsicMatrix.at<double>(0, 2) << " ";
+	std::cout << std::setw(8) << extrinsicMatrix.at<double>(0, 3) << " \\ " << std::endl;
+	std::cout << "\t... | " << std::setw(8) << extrinsicMatrix.at<double>(1, 0) << " ";
+	std::cout << std::setw(8) << extrinsicMatrix.at<double>(1, 1) << " ";
+	std::cout << std::setw(8) << extrinsicMatrix.at<double>(1, 2) << " ";
+	std::cout << std::setw(8) << extrinsicMatrix.at<double>(1, 3) << " | "<< std::endl;;
+	std::cout << "\t... \\ " << std::setw(8) << extrinsicMatrix.at<double>(2, 0) << " ";
+	std::cout << std::setw(8) << extrinsicMatrix.at<double>(2, 1) << " ";
+	std::cout << std::setw(8) << extrinsicMatrix.at<double>(2, 2) << " ";
+	std::cout << std::setw(8) << extrinsicMatrix.at<double>(2, 3) << " / "<< std::endl << std::endl;
+
+	return RET_OK; 
+}
+
+unsigned long AbstractRangeImagingSensor::SetPathToImages(std::string path) 
 {
 	return ipa_Utils::RET_OK;
 };

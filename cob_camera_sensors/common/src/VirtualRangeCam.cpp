@@ -51,19 +51,21 @@
 *
 ****************************************************************/
 
-#include "../include/cob_camera_sensors/StdAfx.h"
+#include <cob_vision_utils/StdAfx.h>
 
 #ifdef __LINUX__
 #include "cob_camera_sensors/VirtualRangeCam.h"
 #include "cob_vision_utils/VisionUtils.h"
+
 #include "tinyxml.h"
+#include <opencv/highgui.h>
+#include <boost/filesystem.hpp>
 #else
 #include "cob_driver/cob_camera_sensors/common/include/cob_camera_sensors/VirtualRangeCam.h"
-#include "cob_common/cob_vision_utils/common/include/cob_vision_utils/VisionUtils.h"
-#include "cob_vision/windows/src/extern/TinyXml/tinyxml.h"
+#include "cob_perception_common/cob_vision_utils/common/include/cob_vision_utils/VisionUtils.h"
 #endif
 
-#include <opencv/highgui.h>
+
 
 namespace fs = boost::filesystem;
 using namespace ipa_CameraSensors;
@@ -237,24 +239,33 @@ unsigned long VirtualRangeCam::Init(std::string directory, int cameraIndex)
 	return RET_OK;
 }
 
-
-inline void VirtualRangeCam::UpdateImageDimensionsOnFirstImage(std::string filename, std::string ext)
+inline void VirtualRangeCam::UpdateImageDimensionsOnFirstImage(std::string filename, int& type, std::string ext)
 {
-	if (m_ImageWidth == -1 || m_ImageHeight == -1)
+	if (m_ImageWidth == -1 || m_ImageHeight == -1 || type == -1)
 	{
-		if (ext != ".bin")
+		if (ext == ".xml")
 		{
 			IplImage* image = (IplImage*) cvLoad(filename.c_str(), 0);
 			m_ImageWidth = image->width;
 			m_ImageHeight = image->height;
+			type = cv::Mat(image).type();
 			cvReleaseImage(&image);
 		}
-		else
+		else if (ext == ".bin")
 		{
 			cv::Mat mat;
 			ipa_Utils::LoadMat(mat, filename);
 			m_ImageHeight = mat.rows;
 			m_ImageWidth = mat.cols;
+			type = mat.type();
+		}
+		else
+		{
+			cv::Mat mat;
+			mat = cv::imread(filename, -1);
+			m_ImageHeight = mat.rows;
+			m_ImageWidth = mat.cols;
+			type = mat.type();
 		}
 	}
 }
@@ -296,12 +307,17 @@ unsigned long VirtualRangeCam::Open()
 	m_ImageWidth = -1;
 	m_ImageHeight = -1;
 
+	m_IntensityImageType = -1;
+	m_AmplitudeImageType = -1;
+	m_RangeImageImageType = -1;
+	m_CoordinateImageType = -1;
+
 	// Create absolute filename and check if directory exists
 	fs::path absoluteDirectoryName( m_CameraDataDirectory );
 	if ( !fs::exists( absoluteDirectoryName ) )
 	{
 		std::cerr << "ERROR - VirtualRangeCam::Open:" << std::endl;
-		std::cerr << "\t ... Path '" << absoluteDirectoryName.file_string() << "' not found" << std::endl;
+		std::cerr << "\t ... Path '" << absoluteDirectoryName.string() << "' not found" << std::endl;
 		return (ipa_CameraSensors::RET_FAILED | ipa_CameraSensors::RET_FAILED_OPEN_FILE);
 	}
 
@@ -319,7 +335,7 @@ unsigned long VirtualRangeCam::Open()
 	if ( fs::exists( absoluteDirectoryName ) )
 	{
 		std::cout << "INFO - VirtualRangeCam::Open   :" << std::endl;
-		std::cout << "\t ... Parsing directory '" << absoluteDirectoryName.directory_string() << "'" << std::endl;
+		std::cout << "\t ... Parsing directory '" << absoluteDirectoryName.string() << "'" << std::endl;
 
 		fs::directory_iterator end_iter;
 		for ( fs::directory_iterator dir_itr( absoluteDirectoryName ); dir_itr != end_iter; ++dir_itr )
@@ -341,7 +357,7 @@ unsigned long VirtualRangeCam::Open()
 							(intensityImageCounter.find(ext) == intensityImageCounter.end()) ? intensityImageCounter[ext] = 1 : intensityImageCounter[ext]++;
 							//std::cout << "VirtualRangeCam::Open(): Reading '" << filename << "\n";
 							intensityImageFileNames[ext].push_back(filename);
-							UpdateImageDimensionsOnFirstImage(filename, ext);
+							UpdateImageDimensionsOnFirstImage(filename, m_IntensityImageType, ext);
 						}
 					}
 
@@ -354,7 +370,7 @@ unsigned long VirtualRangeCam::Open()
 							(amplitudeImageCounter.find(ext) == amplitudeImageCounter.end()) ? amplitudeImageCounter[ext] = 1 : amplitudeImageCounter[ext]++;
 							//std::cout << "VirtualRangeCam::Open(): Reading '" << filename << "\n";
 							amplitudeImageFileNames[ext].push_back(filename);
-							UpdateImageDimensionsOnFirstImage(filename, ext);
+							UpdateImageDimensionsOnFirstImage(filename, m_AmplitudeImageType, ext);
 						}
 					}
 
@@ -366,7 +382,7 @@ unsigned long VirtualRangeCam::Open()
 						{
 							(coordinateImageCounter.find(ext) == coordinateImageCounter.end()) ? coordinateImageCounter[ext] = 1 : coordinateImageCounter[ext]++;
 							coordinateImageFileNames[ext].push_back(filename);
-							UpdateImageDimensionsOnFirstImage(filename, ext);
+							UpdateImageDimensionsOnFirstImage(filename, m_CoordinateImageType, ext);
 							//std::cout << "VirtualRangeCam::Open(): Reading '" << filename << "\n";
 						}
 					}
@@ -380,7 +396,7 @@ unsigned long VirtualRangeCam::Open()
 							(rangeImageCounter.find(ext) == rangeImageCounter.end()) ? rangeImageCounter[ext] = 1 : rangeImageCounter[ext]++;
 							//std::cout << "VirtualRangeCam::Open(): Reading '" << filename << "\n";
 							rangeImageFileNames[ext].push_back(filename);
-							UpdateImageDimensionsOnFirstImage(filename, ext);
+							UpdateImageDimensionsOnFirstImage(filename, m_RangeImageImageType, ext);
 						}
 					}
 				}
@@ -431,9 +447,8 @@ unsigned long VirtualRangeCam::Open()
 		}
 
 		if (coordinateImageCounter[extCoord] != 0 &&
-			((intensityImageCounter[extInt] != coordinateImageCounter[extCoord] &&
-			amplitudeImageCounter[extAmp] != coordinateImageCounter[extCoord]) ||
-			(coordinateImageCounter[extCoord] != rangeImageCounter[extRange])))
+			intensityImageCounter[extInt] != coordinateImageCounter[extCoord] &&
+			amplitudeImageCounter[extAmp] != coordinateImageCounter[extCoord])
 		{
 			std::cerr << "ERROR - VirtualRangeCam::Open:" << std::endl;
 			std::cerr << "\t ... Number of intensity, range and coordinate images must agree." << std::endl;
@@ -450,7 +465,7 @@ unsigned long VirtualRangeCam::Open()
 	else
 	{
 		std::cerr << "ERROR - VirtualRangeCam::Open():" << std::endl;
-		std::cerr << "\t ... Path '" << absoluteDirectoryName.file_string() << "' is not a directory." << std::endl;
+		std::cerr << "\t ... Path '" << absoluteDirectoryName.string() << "' is not a directory." << std::endl;
 		return ipa_CameraSensors::RET_FAILED;
 	}
 
@@ -543,24 +558,61 @@ unsigned long VirtualRangeCam::AcquireImages(cv::Mat* rangeImage, cv::Mat* grayI
 
 	if(rangeImage)
 	{
-		rangeImage->create(m_ImageHeight, m_ImageWidth, CV_32FC1);
-		rangeImageData = (char*) rangeImage->data;
-		widthStepRange = rangeImage->step;
+		if (!m_RangeImageFileNames.empty())
+		{
+			rangeImage->create(m_ImageHeight, m_ImageWidth, CV_32FC1);
+			rangeImageData = (char*) rangeImage->data;
+			widthStepRange = rangeImage->step;
+		}
+		else
+		{
+			std::cout << "\t ... [WARNING] No range images loaded\n";
+		}
 	}
 
 	if(grayImage)
 	{
-		if (grayImageType == ipa_CameraSensors::INTENSITY_8U3) grayImage->create(m_ImageHeight, m_ImageWidth, CV_8UC3);
-		else grayImage->create(m_ImageHeight, m_ImageWidth, CV_32FC1);
-		grayImageData = (char*) grayImage->data;
-		widthStepGray = grayImage->step;
+		if (grayImageType == ipa_CameraSensors::INTENSITY)
+		{
+			if (!m_IntensityImageFileNames.empty())
+			{
+				grayImage->create(m_ImageHeight, m_ImageWidth, m_IntensityImageType);
+				grayImageData = (char*) grayImage->data;
+				widthStepGray = grayImage->step;
+			}
+			else
+			{
+				std::cout << "\t ... [WARNING] No intensity images loaded\n";
+			}
+		}
+		if (grayImageType == ipa_CameraSensors::AMPLITUDE)
+		{
+			if (!m_AmplitudeImageFileNames.empty())
+			{
+				grayImage->create(m_ImageHeight, m_ImageWidth, m_AmplitudeImageType);
+				grayImageData = (char*) grayImage->data;
+				widthStepGray = grayImage->step;
+			}
+			else
+			{
+				std::cout << "\t ... [WARNING] No amplitude images loaded\n";
+			}
+		}
+		
 	}
 
 	if(cartesianImage)
 	{
-		cartesianImage->create(m_ImageHeight, m_ImageWidth, CV_32FC3);
-		cartesianImageData = (char*) cartesianImage->data;
-		widthStepCartesian = cartesianImage->step;
+		if (!m_CoordinateImageFileNames.empty())
+		{
+			cartesianImage->create(m_ImageHeight, m_ImageWidth, CV_32FC3);
+			cartesianImageData = (char*) cartesianImage->data;
+			widthStepCartesian = cartesianImage->step;
+		}
+		else
+		{
+			std::cout << "\t ... [WARNING] No cartesian images loaded\n";
+		}
 	}
 
 	if (widthStepRange+widthStepGray+widthStepCartesian == -3)
@@ -651,7 +703,7 @@ unsigned long VirtualRangeCam::AcquireImages(int widthStepRange, int widthStepGr
 		bool releaseNecessary = false;
 
 		// load image
-		if ((grayImageType == ipa_CameraSensors::INTENSITY_32F1) || (grayImageType == ipa_CameraSensors::INTENSITY_8U3))
+		if (grayImageType == ipa_CameraSensors::INTENSITY)
 		{
 			// intensity image
 			if (m_IntensityImageFileNames[m_ImageCounter].find(".bin") != std::string::npos)
@@ -677,7 +729,7 @@ unsigned long VirtualRangeCam::AcquireImages(int widthStepRange, int widthStepGr
 				CV_Assert(false);
 			}
 		}
-		else
+		else if (grayImageType == ipa_CameraSensors::AMPLITUDE)
 		{
 			// amplitude image
 			if (m_AmplitudeImageFileNames[m_ImageCounter].find(".bin") != std::string::npos)
@@ -697,47 +749,47 @@ unsigned long VirtualRangeCam::AcquireImages(int widthStepRange, int widthStepGr
 				CV_Assert(false);
 			}
 		}
-
+		else
+		{
+			std::cerr << "ERROR - VirtualRangeCam::AcquireImages:\n";
+			std::cerr << "\t ... value of 'grayImageType' unknown.\n";
+		}
+		
 		// process image
 		if (!undistort)
 		{
-			if (grayImageType == ipa_CameraSensors::INTENSITY_8U3)
+			
+			if ((grayImageType == ipa_CameraSensors::INTENSITY && m_IntensityImageType == CV_32FC1) ||
+				(grayImageType == ipa_CameraSensors::AMPLITUDE && m_AmplitudeImageType == CV_32FC1))
 			{
-				for(unsigned int row=0; row<(unsigned int)m_ImageHeight; row++)
-				{
-					f_ptr = (float*) (grayImage->imageData + row*grayImage->widthStep);
-					f_ptr_dst = (float*) (grayImageData + row*widthStepGray);
-
-					for (unsigned int col=0; col<(unsigned int)m_ImageWidth; col++)
-					{
-						f_ptr_dst[col] = f_ptr[col];
-					}
-				}
+				memcpy(grayImageData, grayImage->imageData, sizeof(float) * m_ImageWidth * m_ImageHeight * 1);
+			}
+			if ((grayImageType == ipa_CameraSensors::INTENSITY && m_IntensityImageType == CV_8UC3) ||
+				(grayImageType == ipa_CameraSensors::AMPLITUDE && m_AmplitudeImageType == CV_8UC3))
+			{
+				memcpy(grayImageData, grayImage->imageData, sizeof(unsigned char) * m_ImageWidth * m_ImageHeight * 3);
 			}
 			else
 			{
-				for(unsigned int row=0; row<(unsigned int)m_ImageHeight; row++)
-				{
-					uc_ptr = (unsigned char*) (grayImage->imageData + row*grayImage->widthStep);
-					uc_ptr_dst = (unsigned char*) (grayImageData + row*widthStepGray);
-
-					for (unsigned int col=0; col<(unsigned int)m_ImageWidth; col++)
-					{
-						uc_ptr_dst[col] = uc_ptr[col];
-					}
-				}
+				std::cerr << "ERROR - VirtualRangeCam::AcquireImages:\n";
+				std::cerr << "\t ... Copy function for intensity type undefined.\n";
 			}
 		}
 		else
 		{
 			cv::Mat undistortedData;
-			if (grayImageType == ipa_CameraSensors::INTENSITY_8U3)
+			if (m_IntensityImageType == CV_8UC3)
 			{
 				undistortedData = cv::Mat(m_ImageHeight, m_ImageWidth, CV_8UC3, (unsigned char*) grayImageData);
 			}
-			else
+			else if (m_IntensityImageType == CV_32FC1)
 			{
 				undistortedData = cv::Mat(m_ImageHeight, m_ImageWidth, CV_32FC1, (float*) grayImageData);
+			}
+			else
+			{
+				std::cerr << "ERROR - VirtualRangeCam::AcquireImages:\n";
+				std::cerr << "\t ... Undistortion for intensity type undefined.\n";
 			}
 			cv::Mat cpp_grayImage = grayImage;
 
@@ -892,7 +944,16 @@ int VirtualRangeCam::GetNumberOfImages()
 	return min;
 }
 
-unsigned long VirtualRangeCam::SetPathToImages(std::string path)
+unsigned long VirtualRangeCam::ResetImages() 
+{
+	m_IntensityImageFileNames.clear();
+	m_AmplitudeImageFileNames.clear();
+	m_RangeImageFileNames.clear();
+	m_CoordinateImageFileNames.clear();
+	return ipa_Utils::RET_OK;
+}
+
+unsigned long VirtualRangeCam::SetPathToImages(std::string path) 
 {
 	m_CameraDataDirectory = path;
 	return ipa_Utils::RET_OK;

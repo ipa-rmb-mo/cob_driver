@@ -59,17 +59,16 @@
 #ifndef __IPA_ABSTRACTRANGEIMAGINGSENSOR_H__
 #define __IPA_ABSTRACTRANGEIMAGINGSENSOR_H__
 
-#include "StdAfx.h"
 
 #ifdef __LINUX__
 	#include "cob_vision_utils/CameraSensorDefines.h"
 	#include "cob_vision_utils/CameraSensorTypes.h"
 #else
-	#include "cob_common/cob_vision_utils/common/include/cob_vision_utils/CameraSensorDefines.h"
-	#include "cob_common/cob_vision_utils/common/include/cob_vision_utils/CameraSensorTypes.h"
+	#include "cob_perception_common/cob_vision_utils/common/include/cob_vision_utils/CameraSensorDefines.h"
+	#include "cob_perception_common/cob_vision_utils/common/include/cob_vision_utils/CameraSensorTypes.h"
 #endif
 
-#include <opencv/cv.h>
+#include <opencv2/core/core.hpp>
 
 #include <iostream>
 #include <limits>
@@ -156,7 +155,7 @@ public:
 	/// @throw IPA_Exception Throws an exception, if camera access failed
 	virtual unsigned long AcquireImages(cv::Mat* rangeImage = 0, cv::Mat* intensityImage = 0,
 		cv::Mat* cartesianImage = 0, bool getLatestFrame=true, bool undistort=true,
-		ipa_CameraSensors::t_ToFGrayImageType grayImageType = ipa_CameraSensors::INTENSITY_32F1) = 0;
+		ipa_CameraSensors::t_ToFGrayImageType grayImageType = ipa_CameraSensors::INTENSITY) = 0;
 
 	/// Acquires an image from SwissRanger.
 	/// This implementation is designated for people that do not use openCV image type.
@@ -172,7 +171,7 @@ public:
 	/// @return Return code.
 	virtual unsigned long AcquireImages(int widthStepRange, int widthStepGray, int widthStepCartesian, char* rangeImage=NULL, char* grayImage=NULL,
 		char* cartesianImage=NULL, bool getLatestFrame=true, bool undistort=true,
-		ipa_CameraSensors::t_ToFGrayImageType grayImageType = ipa_CameraSensors::INTENSITY_32F1) = 0;
+		ipa_CameraSensors::t_ToFGrayImageType grayImageType = ipa_CameraSensors::INTENSITY) = 0;
 
 	/// Save camera parameters.
 	/// Saves the on-line set parameters for the range imaging camera to a file.
@@ -208,6 +207,8 @@ public:
 	virtual unsigned long SetIntrinsics(cv::Mat& intrinsicMatrix,
 		cv::Mat& undistortMapX, cv::Mat& undistortMapY);
 
+	virtual unsigned long SetExtrinsics(cv::Mat& extrinsicMatrix);
+
 	/// Returns the number of images in the directory
 	/// @return The number of images in the directory
 	virtual int GetNumberOfImages() {return std::numeric_limits<int>::max();};
@@ -217,6 +218,8 @@ public:
 	/// @param path The camera path
 	/// @return Return code
 	virtual unsigned long SetPathToImages(std::string path);
+
+	virtual unsigned long ResetImages() {return RET_OK;};
 
 	unsigned int m_ImageCounter; ///< Holds the index of the image that is extracted during the next call of <code>AcquireImages</code>
 
@@ -232,6 +235,7 @@ protected:
 	unsigned int m_BufferSize; ///< Number of images, the camera buffers internally
 
 	cv::Mat m_intrinsicMatrix;		///< Intrinsic parameters [fx 0 cx; 0 fy cy; 0 0 1]
+	cv::Mat m_extrinsicMatrix;		///< Extrinsic parameters: Translation und Rotation
 	cv::Mat m_undistortMapX;		///< The output array of x coordinates for the undistortion map
 	cv::Mat m_undistortMapY;		///< The output array of Y coordinates for the undistortion map
 
@@ -251,6 +255,8 @@ __DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_
 __DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_Swissranger();
 __DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_PMDCam();
 __DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_Kinect();
+__DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_EnsensoN30();
+__DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_EnsensoIDSColorRack();
 
 } // end namespace ipa_CameraSensors
 #endif // __IPA_ABSTRACTRANGEIMAGINGSENSOR_H__
