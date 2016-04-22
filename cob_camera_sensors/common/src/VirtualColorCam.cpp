@@ -50,7 +50,7 @@
 * If not, see <http://www.gnu.org/licenses/>.
 *
 ****************************************************************/
-#include "../include/cob_camera_sensors/StdAfx.h"
+#include "cob_vision_utils/StdAfx.h"
 
 #ifdef __LINUX__
 #include "cob_camera_sensors/VirtualColorCam.h"
