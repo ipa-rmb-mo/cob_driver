@@ -58,6 +58,9 @@
     <ClCompile Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\src\EnsensoIDSColorRack.cpp">
       <Filter>cob_camera_sensors_ipa</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\src\SoftkineticCamera.cpp">
+      <Filter>cob_camera_sensors_ipa</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\cob_object_perception_intern\windows\src\extern\MemJpegDecoder\memJpegDecoder.h">
@@ -121,6 +124,9 @@
       <Filter>cob_camera_sensors_ipa</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\include\cob_camera_sensors_ipa\EnsensoIDSColorRack.h">
+      <Filter>cob_camera_sensors_ipa</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\include\cob_camera_sensors_ipa\SoftkineticCamera.h">
       <Filter>cob_camera_sensors_ipa</Filter>
     </ClInclude>
   </ItemGroup>

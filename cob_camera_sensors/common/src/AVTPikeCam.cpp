@@ -50,7 +50,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  *
  ****************************************************************/
+
 #include <cob_vision_utils/StdAfx.h>
+
+#ifdef __BUILD_WITH_AVTPIKECAM__
 
 #ifdef __LINUX__
 #include "cob_camera_sensors/AVTPikeCam.h"
@@ -4018,3 +4021,4 @@ unsigned long AVTPikeCam::LoadParameters(const char* filename, int cameraIndex)
 	return RET_OK;
 }
 
+#endif // __BUILD_WITH_AVTPIKECAM__

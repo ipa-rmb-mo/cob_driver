@@ -257,6 +257,7 @@ __DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_
 __DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_Kinect();
 __DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_EnsensoN30();
 __DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_EnsensoIDSColorRack();
+__DLL_LIBCAMERASENSORS__ AbstractRangeImagingSensorPtr CreateRangeImagingSensor_SoftkineticCamera();
 
 } // end namespace ipa_CameraSensors
 #endif // __IPA_ABSTRACTRANGEIMAGINGSENSOR_H__

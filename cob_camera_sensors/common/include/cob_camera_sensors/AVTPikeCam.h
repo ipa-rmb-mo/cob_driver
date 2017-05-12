@@ -56,6 +56,7 @@
 /// @author Jan Fischer
 /// @date Novemeber, 2008
 
+#ifdef __BUILD_WITH_AVTPIKECAM__
 
 #ifndef __IPA_AVTPIKECAM_H__
 #define __IPA_AVTPIKECAM_H__
@@ -219,3 +220,4 @@ __DLL_LIBCAMERASENSORS__ AbstractColorCameraPtr CreateColorCamera_AVTPikeCam();
 #endif //__IPA_AVTPIKECAM_H__
 
 
+#endif // __BUILD_WITH_AVTPIKECAM__

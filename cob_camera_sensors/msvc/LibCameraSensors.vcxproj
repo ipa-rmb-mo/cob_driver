@@ -99,9 +99,9 @@
     <Import Project="..\..\..\cob_object_perception_intern\windows\property_sheets\jpeg-vc100-x64.props" />
     <Import Project="..\..\..\cob_object_perception_intern\windows\property_sheets\openCV-vc100-x64.props" />
     <Import Project="..\..\..\cob_object_perception_intern\windows\property_sheets\wm-vc100-x64.props" />
-    <Import Project="..\..\..\cob_object_perception_intern\windows\property_sheets\avtpike-vc100-x64.props" />
-    <Import Project="..\..\..\cob_object_perception_intern\windows\property_sheets\ensenso-vc100-x64.props" />
     <Import Project="..\..\..\cob_object_perception_intern\windows\property_sheets\idsueye-vc100-x64.props" />
+    <Import Project="..\..\..\cob_object_perception_intern\windows\property_sheets\ensenso-vc100-x64.props" />
+    <Import Project="..\..\..\cob_object_perception_intern\windows\property_sheets\softkinetic-vc100-x64.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -291,7 +291,7 @@ copy "$(OutDir)$(ProjectName).lib" "$(COB3_DIR)\cob_object_perception_intern\win
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(OPENNI2_INCLUDE64);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_WIN64;_WIN32;NDEBUG;__LIBCAMERASENSORS_EXPORT__;__USE_AVTPIKECAM__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WIN64;_WIN32;NDEBUG;__LIBCAMERASENSORS_EXPORT__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -337,6 +337,7 @@ copy "$(OutDir)$(ProjectName).lib" "$(COB3_DIR)\cob_object_perception_intern\win
     <ClCompile Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\src\EnsensoIDSColorRack.cpp" />
     <ClCompile Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\src\EnsensoN30.cpp" />
     <ClCompile Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\src\IDSuEyeCamera.cpp" />
+    <ClCompile Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\src\SoftkineticCamera.cpp" />
     <ClCompile Include="..\..\..\cob_perception_common\cob_vision_utils\common\src\CameraSensorToolbox.cpp" />
     <ClCompile Include="..\..\..\cob_driver\cob_camera_sensors\common\src\AbstractColorCamera.cpp" />
     <ClCompile Include="..\..\..\cob_driver\cob_camera_sensors\common\src\AbstractRangeImagingSensor.cpp" />
@@ -396,6 +397,7 @@ copy "$(OutDir)$(ProjectName).lib" "$(COB3_DIR)\cob_object_perception_intern\win
     <ClInclude Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\include\cob_camera_sensors_ipa\EnsensoIDSColorRack.h" />
     <ClInclude Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\include\cob_camera_sensors_ipa\EnsensoN30.h" />
     <ClInclude Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\include\cob_camera_sensors_ipa\IDSuEyeCamera.h" />
+    <ClInclude Include="..\..\..\cob_bringup_sandbox\cob_camera_sensors_ipa\common\include\cob_camera_sensors_ipa\SoftkineticCamera.h" />
     <ClInclude Include="..\..\..\cob_driver\cob_camera_sensors\common\include\cob_camera_sensors\AbstractColorCamera.h" />
     <ClInclude Include="..\..\..\cob_driver\cob_camera_sensors\common\include\cob_camera_sensors\AbstractRangeImagingSensor.h" />
     <ClInclude Include="..\..\..\cob_driver\cob_camera_sensors\common\include\cob_camera_sensors\AVTPikeCam.h" />
